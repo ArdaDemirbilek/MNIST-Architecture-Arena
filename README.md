@@ -26,7 +26,7 @@ Both models were trained using 55,000 MNIST images and evaluated on the same ind
 
 The MLP achieved an improvement of **1.58 percentage points** in validation accuracy, correctly classifying 79 additional images compared with Softmax Regression.
 
-It also achieved a lower validation cross-entropy loss, suggesting improved predictive performance beyond classification accuracy alone.
+It also achieved a lower validation cross-entropy loss, indicating improved predictive performance beyond classification accuracy alone.
 
 Both models were trained for 10 epochs with a batch size of 64. However, different learning rates were used, so the improvement cannot be attributed exclusively to architecture.
 
@@ -34,14 +34,14 @@ Both models were trained for 10 epochs with a batch size of 64. However, differe
 
 ![Training Loss Comparison](experiments/comparison/training_loss.png)
 
-The training curves reveal several interesting observations:
+The training curves reveal several observations:
 
-- Softmax Regression initially converges faster.
+- Softmax Regression initially achieves a lower training loss.
 - The MLP's training loss decreases more substantially over successive epochs.
 - After approximately six epochs, the MLP achieves a lower training loss than Softmax Regression.
 - Both models exhibit stable optimization throughout training.
 
-These observations demonstrate how introducing a nonlinear hidden layer can increase a model's representational capacity.
+The MLP's nonlinear hidden layer provides greater representational capacity than the linear baseline, although additional controlled experiments are needed to isolate the impact of architecture.
 
 **Important:** All reported accuracy results refer to the validation set. The independent test set remains reserved for final model evaluation.
 
@@ -53,42 +53,42 @@ These observations demonstrate how introducing a nonlinear hidden layer can incr
 
 Softmax Regression extends binary logistic regression to multiclass classification.
 
-For an input matrix \(X\), the model computes:
+For an input matrix `X`, the model computes:
 
-\[
+$$
 Z = XW + b
-\]
+$$
 
 The resulting logits are converted into class probabilities using the Softmax function:
 
-\[
+$$
 P_{ij} =
 \frac{e^{Z_{ij}}}
 {\sum_{k=1}^{C}e^{Z_{ik}}}
-\]
+$$
 
 The model minimizes categorical cross-entropy:
 
-\[
+$$
 L = -\frac{1}{m}
 \sum_{i=1}^{m}
 \sum_{j=1}^{C}
 Y_{ij}\log(P_{ij})
-\]
+$$
 
 The analytical gradients are:
 
-\[
+$$
 \frac{\partial L}{\partial W}
 =
 \frac{1}{m}X^T(P-Y)
-\]
+$$
 
-\[
+$$
 \frac{\partial L}{\partial b}
 =
 \frac{1}{m}\sum_{i=1}^{m}(P_i-Y_i)
-\]
+$$
 
 These gradients are implemented using vectorized NumPy operations.
 
@@ -133,29 +133,29 @@ Class Probabilities
 
 First hidden layer:
 
-\[
-Z_1 = XW_1+b_1
-\]
+$$
+Z_1 = XW_1 + b_1
+$$
 
-\[
+$$
 A_1 = \operatorname{ReLU}(Z_1)
-\]
+$$
 
 Output layer:
 
-\[
-Z_2 = A_1W_2+b_2
-\]
+$$
+Z_2 = A_1W_2 + b_2
+$$
 
-\[
+$$
 P = \operatorname{softmax}(Z_2)
-\]
+$$
 
 The ReLU activation is defined as:
 
-\[
-\operatorname{ReLU}(x)=\max(0,x)
-\]
+$$
+\operatorname{ReLU}(x) = \max(0,x)
+$$
 
 Unlike Softmax Regression, the MLP can learn nonlinear decision boundaries.
 
@@ -165,35 +165,38 @@ The gradients are calculated manually using the chain rule.
 
 Output-layer error:
 
-\[
-dZ_2=P-Y
-\]
+$$
+dZ_2 = P-Y
+$$
 
 Output-layer gradients:
 
-\[
-dW_2=\frac{1}{m}A_1^TdZ_2
-\]
+$$
+dW_2 = \frac{1}{m}A_1^TdZ_2
+$$
 
-\[
-db_2=\frac{1}{m}\sum_{i=1}^{m}(dZ_2)_i
-\]
+$$
+db_2 = \frac{1}{m}\sum_{i=1}^{m}(dZ_2)_i
+$$
 
 Hidden-layer error:
 
-\[
-dZ_1=(dZ_2W_2^T)\odot\operatorname{ReLU}'(Z_1)
-\]
+$$
+dZ_1 =
+(dZ_2W_2^T)
+\odot
+\operatorname{ReLU}'(Z_1)
+$$
 
 Hidden-layer gradients:
 
-\[
-dW_1=\frac{1}{m}X^TdZ_1
-\]
+$$
+dW_1 = \frac{1}{m}X^TdZ_1
+$$
 
-\[
-db_1=\frac{1}{m}\sum_{i=1}^{m}(dZ_1)_i
-\]
+$$
+db_1 = \frac{1}{m}\sum_{i=1}^{m}(dZ_1)_i
+$$
 
 All gradients are computed using vectorized NumPy operations without automatic differentiation.
 
@@ -255,17 +258,17 @@ For every epoch:
 
 Parameter updates follow:
 
-\[
+$$
 \theta_{t+1}
 =
 \theta_t-\eta\nabla_\theta L
-\]
+$$
 
 where:
 
-- \(\theta\) represents model parameters.
-- \(\eta\) is the learning rate.
-- \(\nabla_\theta L\) is the gradient of the loss.
+- `θ` represents model parameters.
+- `η` is the learning rate.
+- `∇L` is the gradient of the loss.
 
 ### Training Configurations
 
@@ -348,14 +351,14 @@ Tests cover:
 
 To verify backpropagation, analytical gradients are compared against numerical approximations obtained using finite differences.
 
-For a parameter \(\theta\):
+For a parameter `θ`:
 
-\[
+$$
 \frac{\partial L}{\partial\theta}
 \approx
 \frac{L(\theta+\epsilon)-L(\theta-\epsilon)}
 {2\epsilon}
-\]
+$$
 
 This provides an independent check of the manually derived gradients.
 
@@ -448,8 +451,10 @@ This command:
 3. Trains the MLP.
 4. Evaluates both models on the validation set.
 5. Saves experimental configurations and metrics.
-6. Generates training loss visualizations.
-7. Displays a performance comparison.
+6. Generates individual training loss visualizations.
+7. Displays a performance comparison in the terminal.
+
+The comparison figure can also be generated from previously saved training histories using the plotting utility.
 
 ### Run Tests
 
