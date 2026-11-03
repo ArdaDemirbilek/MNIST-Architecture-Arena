@@ -1,6 +1,7 @@
 import numpy as np
 
 from models.mlp import relu, MLP
+from models.softmax_regression import cross_entropy
 
 
 class TestRelu:
@@ -30,3 +31,26 @@ class TestMLP:
         test_targets=np.array([[1.0, 0.0], [1.0, 0.0]])
 
         assert np.allclose(test_probs, test_targets, rtol=0, atol=1/100)
+
+    def test_gradient_check(self):
+        rng = np.random.default_rng(0)
+        test_mlp = MLP(input_dim=5, hidden_dim=4, num_classes=3)
+        X_train = rng.standard_normal((6, 5))
+        Y_train = np.eye(3)[rng.integers(0, 3, size=6)]
+        eps = 1e-6
+
+        grads = test_mlp.compute_gradients(X_train, Y_train)
+        params = [test_mlp.W1, test_mlp.b1, test_mlp.W2, test_mlp.b2]
+
+        for param, grad in zip(params, grads):
+            numerical_grad = np.zeros_like(param)
+            for idx in np.ndindex(param.shape):
+                original = param[idx]
+                param[idx] = original + eps
+                loss_plus = cross_entropy(test_mlp.forward(X_train), Y_train)
+                param[idx] = original - eps
+                loss_minus = cross_entropy(test_mlp.forward(X_train), Y_train)
+                param[idx] = original
+                numerical_grad[idx] = (loss_plus - loss_minus) / (2 * eps)
+
+            assert np.allclose(grad, numerical_grad, rtol=0, atol=1e-7)
