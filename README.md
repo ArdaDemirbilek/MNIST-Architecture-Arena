@@ -53,42 +53,43 @@ The MLP's nonlinear hidden layer provides greater representational capacity than
 
 Softmax Regression extends binary logistic regression to multiclass classification.
 
-For an input matrix `X`, the model computes:
+For an input matrix `X`, the model first computes the logits:
 
-$$
-Z = XW + b
-$$
+```text
+Z = X @ W + b
+```
 
-The resulting logits are converted into class probabilities using the Softmax function:
+The logits are converted into class probabilities using Softmax:
 
-$$
-P_{ij} =
-\frac{e^{Z_{ij}}}
-{\sum_{k=1}^{C}e^{Z_{ik}}}
-$$
+```text
+P[i,j] = exp(Z[i,j]) / sum(exp(Z[i,k]) for k in classes)
+```
 
-The model minimizes categorical cross-entropy:
+The model minimizes mean categorical cross-entropy:
 
-$$
-L = -\frac{1}{m}
-\sum_{i=1}^{m}
-\sum_{j=1}^{C}
-Y_{ij}\log(P_{ij})
-$$
+```text
+L = -(1/m) * sum(Y[i,j] * log(P[i,j]) for all samples i and classes j)
+```
+
+where:
+
+- `m` is the number of training samples.
+- `Y` contains the one-hot encoded target labels.
+- `P` contains the predicted class probabilities.
 
 The analytical gradients are:
 
-$$
-\frac{\partial L}{\partial W}
-=
-\frac{1}{m}X^T(P-Y)
-$$
+**Weight gradient:**
 
-$$
-\frac{\partial L}{\partial b}
-=
-\frac{1}{m}\sum_{i=1}^{m}(P_i-Y_i)
-$$
+```text
+dW = X.T @ (P - Y) / m
+```
+
+**Bias gradient:**
+
+```text
+db = sum(P - Y, axis=0) / m
+```
 
 These gradients are implemented using vectorized NumPy operations.
 
@@ -133,29 +134,25 @@ Class Probabilities
 
 First hidden layer:
 
-$$
-Z_1 = XW_1 + b_1
-$$
+```text
+Z1 = X @ W1 + b1
 
-$$
-A_1 = \operatorname{ReLU}(Z_1)
-$$
+A1 = ReLU(Z1)
+```
 
 Output layer:
 
-$$
-Z_2 = A_1W_2 + b_2
-$$
+```text
+Z2 = A1 @ W2 + b2
 
-$$
-P = \operatorname{softmax}(Z_2)
-$$
+P = Softmax(Z2)
+```
 
 The ReLU activation is defined as:
 
-$$
-\operatorname{ReLU}(x) = \max(0,x)
-$$
+```text
+ReLU(x) = max(0, x)
+```
 
 Unlike Softmax Regression, the MLP can learn nonlinear decision boundaries.
 
@@ -163,40 +160,35 @@ Unlike Softmax Regression, the MLP can learn nonlinear decision boundaries.
 
 The gradients are calculated manually using the chain rule.
 
-Output-layer error:
+**Output-layer error:**
 
-$$
-dZ_2 = P-Y
-$$
+```text
+dZ2 = P - Y
+```
 
-Output-layer gradients:
+**Output-layer gradients:**
 
-$$
-dW_2 = \frac{1}{m}A_1^TdZ_2
-$$
+```text
+dW2 = A1.T @ dZ2 / m
 
-$$
-db_2 = \frac{1}{m}\sum_{i=1}^{m}(dZ_2)_i
-$$
+db2 = sum(dZ2, axis=0) / m
+```
 
-Hidden-layer error:
+**Hidden-layer error:**
 
-$$
-dZ_1 =
-(dZ_2W_2^T)
-\odot
-\operatorname{ReLU}'(Z_1)
-$$
+```text
+dZ1 = (dZ2 @ W2.T) * (Z1 > 0)
+```
 
-Hidden-layer gradients:
+Here, `*` represents element-wise multiplication. The boolean expression `(Z1 > 0)` implements the derivative of ReLU, taking the derivative at zero to be zero.
 
-$$
-dW_1 = \frac{1}{m}X^TdZ_1
-$$
+**Hidden-layer gradients:**
 
-$$
-db_1 = \frac{1}{m}\sum_{i=1}^{m}(dZ_1)_i
-$$
+```text
+dW1 = X.T @ dZ1 / m
+
+db1 = sum(dZ1, axis=0) / m
+```
 
 All gradients are computed using vectorized NumPy operations without automatic differentiation.
 
@@ -258,17 +250,15 @@ For every epoch:
 
 Parameter updates follow:
 
-$$
-\theta_{t+1}
-=
-\theta_t-\eta\nabla_\theta L
-$$
+```text
+theta_new = theta_old - learning_rate * gradient
+```
 
 where:
 
-- `θ` represents model parameters.
-- `η` is the learning rate.
-- `∇L` is the gradient of the loss.
+- `theta` represents model parameters.
+- `learning_rate` is the optimization step size.
+- `gradient` is the derivative of the loss with respect to the parameter.
 
 ### Training Configurations
 
@@ -351,14 +341,12 @@ Tests cover:
 
 To verify backpropagation, analytical gradients are compared against numerical approximations obtained using finite differences.
 
-For a parameter `θ`:
+For a parameter `theta`:
 
-$$
-\frac{\partial L}{\partial\theta}
-\approx
-\frac{L(\theta+\epsilon)-L(\theta-\epsilon)}
-{2\epsilon}
-$$
+```text
+numerical_gradient =
+    (Loss(theta + epsilon) - Loss(theta - epsilon)) / (2 * epsilon)
+```
 
 This provides an independent check of the manually derived gradients.
 
