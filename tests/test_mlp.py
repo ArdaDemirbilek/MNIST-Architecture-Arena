@@ -6,6 +6,7 @@ from models.softmax_regression import cross_entropy
 
 class TestRelu:
     def test_relu_mathematical_property(self):
+        """Checks that relu output is never negative for random inputs."""
         rng = np.random.default_rng()
         arr1 = rng.standard_normal((10,8))
 
@@ -14,6 +15,7 @@ class TestRelu:
 
 class TestMLP:
     def test_shape_check(self):
+        """Checks that the weights and biases of both layers are initialized with the expected shapes."""
         mlp1 = MLP(input_dim=784, hidden_dim=128, num_classes=10)
 
         assert  (mlp1.b1.shape == (mlp1.hidden_dim, )) and \
@@ -22,6 +24,7 @@ class TestMLP:
             (mlp1.W2.shape == (mlp1.hidden_dim, mlp1.num_classes))
 
     def test_known_forward_value(self):
+        """Checks that a forward pass with hand-set weights gives probabilities within 0.01 of the expected values."""
         test_mlp = MLP(input_dim=3, hidden_dim=2, num_classes=2)
         test_mlp.W1 = np.array([[1.0, 2.0], [-1.0, 1.0], [0.0, 3.0]])
         test_mlp.W2 = np.array([[1.0, -1.0], [2.0, -2.0]])
@@ -33,6 +36,7 @@ class TestMLP:
         assert np.allclose(test_probs, test_targets, rtol=0, atol=1/100)
 
     def test_gradient_check(self):
+        """Checks that the backpropagation gradients of every parameter match central-difference numerical gradients."""
         rng = np.random.default_rng(0)
         test_mlp = MLP(input_dim=5, hidden_dim=4, num_classes=3)
         X_train = rng.standard_normal((6, 5))

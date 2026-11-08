@@ -1,6 +1,8 @@
 from pathlib import Path
 import json
 import matplotlib.pyplot as plt
+import numpy as np
+
 
 
 def plot_training_history(history, save_path=None):
@@ -99,6 +101,100 @@ def plot_model_comparison(
     save_path.parent.mkdir(parents=True, exist_ok=True)
 
     fig.savefig(save_path, dpi=180, bbox_inches="tight")
+
+    plt.show()
+    plt.close(fig)
+
+
+def plot_confusion_matrix(
+    cm,
+    class_names=None,
+    title="Confusion Matrix",
+    save_path=None,
+):
+    """
+    Visualize a confusion matrix using a heatmap.
+
+    Parameters
+    ----------
+    cm : np.ndarray
+        Square confusion matrix where rows represent
+        true labels and columns represent predictions.
+
+    class_names : list, optional
+        Names of the classes.
+
+    title : str
+        Title of the plot.
+
+    save_path : str or Path, optional
+        Path where the figure should be saved.
+    """
+
+    cm = np.asarray(cm)
+
+    if cm.ndim != 2 or cm.shape[0] != cm.shape[1]:
+        raise ValueError("Confusion matrix must be square.")
+
+    num_classes = cm.shape[0]
+
+    if class_names is None:
+        class_names = [str(i) for i in range(num_classes)]
+
+    if len(class_names) != num_classes:
+        raise ValueError(
+            "Number of class names must match matrix dimensions."
+        )
+
+    fig, ax = plt.subplots(figsize=(9, 7))
+
+    image = ax.imshow(
+        cm,
+        interpolation="nearest",
+        cmap="Blues",
+    )
+
+    fig.colorbar(image, ax=ax)
+
+    ax.set(
+        xticks=np.arange(num_classes),
+        yticks=np.arange(num_classes),
+        xticklabels=class_names,
+        yticklabels=class_names,
+        xlabel="Predicted Label",
+        ylabel="True Label",
+        title=title,
+    )
+
+    threshold = cm.max() / 2
+
+    for i in range(num_classes):
+        for j in range(num_classes):
+
+            ax.text(
+                j,
+                i,
+                str(cm[i, j]),
+                ha="center",
+                va="center",
+                color=(
+                    "white"
+                    if cm[i, j] > threshold
+                    else "black"
+                ),
+                fontsize=9,
+            )
+
+    ax.set_ylim(num_classes - 0.5, -0.5)
+
+    fig.tight_layout()
+
+    if save_path is not None:
+        fig.savefig(
+            save_path,
+            dpi=150,
+            bbox_inches="tight",
+        )
 
     plt.show()
     plt.close(fig)

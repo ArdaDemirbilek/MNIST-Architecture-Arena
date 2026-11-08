@@ -119,6 +119,7 @@ class TestCrossEntropy:
 
 class TestSoftmaxRegression:
     def test_gradient_values(self):
+        """Checks that the gradients at zero-initialized parameters match hand-computed values for W and b."""
         X = np.array([
             [1.0, 2.0],
             [-1.0, 0.0]

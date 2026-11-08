@@ -3,8 +3,9 @@ import numpy as np
 from models.softmax_regression import SoftmaxRegression, cross_entropy
 from models.mlp import MLP
 from utils.data import load_mnist
-from utils.plots import plot_training_history, plot_model_comparison
+from utils.plots import plot_training_history, plot_model_comparison, plot_confusion_matrix
 from utils.experiments import save_experiment
+from utils.evaluation import confusion_matrix
 
 
 def main():
@@ -86,6 +87,21 @@ def main():
         save_path=softmax_dir / "training_loss.png",
     )
 
+    cm = confusion_matrix(
+        np.argmax(Y_val, axis=1), 
+        np.argmax(softmax_val_probs, axis=1), 
+        num_classes=10
+        )
+
+    assert cm.sum() == len(Y_val)
+    
+    plot_confusion_matrix(
+        cm=cm, 
+        class_names=["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+        title="Confusion Matrix of Softmax Regression",
+        save_path=softmax_dir / "confusion_matrix.png",
+    )
+
     # ============================================================
     # EXPERIMENT 2: MULTILAYER PERCEPTRON
     # ============================================================
@@ -157,6 +173,21 @@ def main():
     plot_training_history(
         mlp_history,
         save_path=mlp_dir / "training_loss.png",
+    )
+
+    cm = confusion_matrix(
+        np.argmax(Y_val, axis=1), 
+        np.argmax(mlp_val_probs, axis=1), 
+        num_classes=10
+    )
+
+    assert cm.sum() == len(Y_val)
+
+    plot_confusion_matrix(
+        cm=cm, 
+        class_names=["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+        title="Confusion Matrix of MLP",
+        save_path=mlp_dir / "confusion_matrix.png",
     )
 
     # ============================================================
