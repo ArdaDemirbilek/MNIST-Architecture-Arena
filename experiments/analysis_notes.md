@@ -21,13 +21,15 @@ One possible explanation is that the MLP's nonlinear hidden layer enables it to 
 
 However, this remains a hypothesis rather than a demonstrated explanation of the learned representations. The visual observations are based on a limited sample, and further controlled experiments would be required to identify which features contribute to the improvement.
 
-### Future Investigation
+### Model Complexity and Training Time
 
-- Compare corrected, regressed, and commonly misclassified samples.
-- Evaluate whether the observed patterns persist across different random seeds.
-- Investigate whether CNNs improve recognition of ambiguous digit shapes.
+The MLP contains 101,770 trainable parameters, approximately 12.96 times more than Softmax Regression (7,850 parameters).
 
----
+In the initial benchmark, Softmax Regression completed training in 4.53 seconds, compared with 46.66 seconds for the MLP (approximately 10.30 times longer).
+
+Despite the additional computational cost, the MLP improved validation accuracy by 1.58 percentage points and reduced validation cross-entropy loss by approximately 19.9%.
+
+These findings illustrate a trade-off between predictive performance and computational cost. Training times were measured in a single run and should be interpreted as preliminary benchmarks rather than definitive performance measurements.
 
 ## 2. Hyperparameter Experiments
 

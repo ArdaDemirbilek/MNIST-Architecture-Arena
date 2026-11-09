@@ -1,3 +1,4 @@
+import time
 import numpy as np
 
 from models.softmax_regression import SoftmaxRegression, cross_entropy
@@ -54,6 +55,8 @@ def main():
         cross_entropy(softmax_model.forward(X_train), Y_train)
     )
 
+    softmax_start = time.perf_counter()
+
     softmax_history = softmax_model.fit(
         X_train,
         Y_train,
@@ -61,6 +64,8 @@ def main():
         batch_size=softmax_config["batch_size"],
         learning_rate=softmax_config["learning_rate"],
     )
+
+    softmax_training_time = time.perf_counter() - softmax_start
 
     softmax_val_probs = softmax_model.forward(X_val)
 
@@ -80,6 +85,8 @@ def main():
         "final_training_loss": float(softmax_history["train_loss"][-1]),
         "validation_accuracy": softmax_val_accuracy,
         "validation_loss": softmax_val_loss,
+        "training_time_seconds": float(softmax_training_time),
+        "num_parameters": 7850,
     }
 
     print("\n--- Softmax Regression Results ---")
@@ -87,6 +94,8 @@ def main():
     print(f"Final Training Loss: {softmax_metrics['final_training_loss']:.4f}")
     print(f"Validation Accuracy: {softmax_val_accuracy:.2%}")
     print(f"Validation Loss: {softmax_val_loss:.4f}")
+    print(f"Training Time: {softmax_metrics['training_time_seconds']:.4f}")
+    print(f"Number of Parameters: {softmax_metrics['num_parameters']}")
 
     softmax_dir = save_experiment(
         name="softmax_baseline",
@@ -147,6 +156,8 @@ def main():
         cross_entropy(mlp_model.forward(X_train), Y_train)
     )
 
+    mlp_start = time.perf_counter()
+
     mlp_history = mlp_model.fit(
         X_train,
         Y_train,
@@ -154,6 +165,8 @@ def main():
         batch_size=mlp_config["batch_size"],
         learning_rate=mlp_config["learning_rate"],
     )
+
+    mlp_training_time = time.perf_counter() - mlp_start
 
     mlp_val_probs = mlp_model.forward(X_val)
 
@@ -173,6 +186,9 @@ def main():
         "final_training_loss": float(mlp_history["train_loss"][-1]),
         "validation_accuracy": mlp_val_accuracy,
         "validation_loss": mlp_val_loss,
+        "training_time_seconds": float(mlp_training_time),
+        "num_parameters": 101770,
+
     }
 
     print("\n--- MLP Results ---")
@@ -180,6 +196,8 @@ def main():
     print(f"Final Training Loss: {mlp_metrics['final_training_loss']:.4f}")
     print(f"Validation Accuracy: {mlp_val_accuracy:.2%}")
     print(f"Validation Loss: {mlp_val_loss:.4f}")
+    print(f"Training Time: {mlp_metrics['training_time_seconds']:.4f}")
+    print(f"Number of Parameters: {mlp_metrics['num_parameters']}")
 
     mlp_dir = save_experiment(
         name="mlp_128",
