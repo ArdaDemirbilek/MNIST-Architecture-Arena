@@ -267,3 +267,73 @@ def plot_per_class_accuracy(
 
     plt.show()
     plt.close(fig)
+
+
+def plot_prediction_examples(
+    X,
+    y_true,
+    softmax_pred,
+    mlp_pred,
+    indices,
+    title,
+    save_path=None,
+    max_samples=12,
+):
+    """
+    Display selected MNIST images with predictions
+    from Softmax Regression and MLP.
+    """
+
+    indices = np.asarray(indices, dtype=int)[:max_samples]
+
+    if len(indices) == 0:
+        print(f"No samples available for: {title}")
+        return
+
+    cols = 4
+    rows = int(np.ceil(len(indices) / cols))
+
+    fig, axes = plt.subplots(
+        rows,
+        cols,
+        figsize=(12, 3.8 * rows),
+        squeeze=False,
+    )
+
+    for ax in axes.flat:
+        ax.axis("off")
+
+    for ax, idx in zip(axes.flat, indices):
+
+        image = X[idx].reshape(28, 28)
+
+        true_label = y_true[idx]
+        softmax_label = softmax_pred[idx]
+        mlp_label = mlp_pred[idx]
+
+        ax.imshow(image, cmap="gray")
+
+        ax.set_title(
+            f"True: {true_label} | Softmax: {softmax_label} | MLP: {mlp_label}",
+            fontsize=10,
+            pad=10,
+        )
+
+    fig.suptitle(title, fontsize=15)
+
+    fig.subplots_adjust(
+        hspace=0.65,
+        wspace=0.30,
+        top=0.90,
+        bottom=0.05,
+    )
+
+    if save_path is not None:
+        fig.savefig(
+            save_path,
+            dpi=150,
+            bbox_inches="tight",
+        )
+
+    plt.show()
+    plt.close(fig)

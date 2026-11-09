@@ -4,15 +4,18 @@ from models.softmax_regression import SoftmaxRegression, cross_entropy
 from models.mlp import MLP
 from utils.data import load_mnist
 from utils.experiments import save_experiment
-from utils.plots import (
-    plot_training_history, 
-    plot_model_comparison, 
-    plot_confusion_matrix, 
-    plot_per_class_accuracy
-)
 from utils.evaluation import (
-    confusion_matrix, 
-    per_class_accuracy
+    confusion_matrix,
+    per_class_accuracy,
+    categorize_predictions,
+)
+
+from utils.plots import (
+    plot_training_history,
+    plot_model_comparison,
+    plot_confusion_matrix,
+    plot_per_class_accuracy,
+    plot_prediction_examples,
 )
 
 
@@ -97,11 +100,14 @@ def main():
         save_path=softmax_dir / "training_loss.png",
     )
 
+    y_true = np.argmax(Y_val, axis=1)
+    softmax_pred = np.argmax(softmax_val_probs, axis=1)
+
     softmax_cm = confusion_matrix(
-    np.argmax(Y_val, axis=1),
-    np.argmax(softmax_val_probs, axis=1),
-    num_classes=10,
-)
+        y_true,
+        softmax_pred,
+        num_classes=10,
+    )
 
     assert softmax_cm.sum() == len(Y_val)
 
@@ -187,10 +193,12 @@ def main():
         save_path=mlp_dir / "training_loss.png",
     )
 
+    mlp_pred = np.argmax(mlp_val_probs, axis=1)
+
     mlp_cm = confusion_matrix(
-    np.argmax(Y_val, axis=1),
-    np.argmax(mlp_val_probs, axis=1),
-    num_classes=10,
+        y_true,
+        mlp_pred,
+        num_classes=10,
     )
 
     assert mlp_cm.sum() == len(Y_val)
@@ -247,8 +255,31 @@ def main():
         print(
             np.round(softmax_per_class[i], decimals=2), 
             np.round(mlp_per_class[i], decimals=2), 
-            sep="\t\t"
+            sep="      "
         )
+
+    print("----------------------\n\n")
+
+    categories = categorize_predictions(
+        y_true,
+        softmax_pred,
+        mlp_pred,
+    )
+
+    corrected_eights = categories["mlp_corrected"][
+        y_true[categories["mlp_corrected"]] == 8
+    ]
+
+    plot_prediction_examples(
+        X=X_val,
+        y_true=y_true,
+        softmax_pred=softmax_pred,
+        mlp_pred=mlp_pred,
+        indices=corrected_eights,
+        title="Digit 8 - Errors Corrected by MLP",
+        save_path="experiments/comparison/corrected_eights.png",
+        max_samples=16,
+    )
 
     print("\nExperiments saved successfully.")
 

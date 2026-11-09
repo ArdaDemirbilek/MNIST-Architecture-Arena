@@ -42,3 +42,34 @@ def per_class_accuracy(cm):
     ) * 100
 
     return accuracies
+
+
+def categorize_predictions(y_true, softmax_pred, mlp_pred):
+    """
+    Categorize validation samples based on model predictions.
+
+    Returns:
+        Dictionary containing sample indices for each category.
+    """
+
+    y_true = np.asarray(y_true)
+    softmax_pred = np.asarray(softmax_pred)
+    mlp_pred = np.asarray(mlp_pred)
+
+    if not (y_true.shape == softmax_pred.shape == mlp_pred.shape):
+        raise ValueError("Prediction arrays must have matching shapes.")
+
+    softmax_correct = softmax_pred == y_true
+    mlp_correct = mlp_pred == y_true
+
+    return {
+        "mlp_corrected": np.flatnonzero(
+            ~softmax_correct & mlp_correct
+        ),
+        "mlp_regressed": np.flatnonzero(
+            softmax_correct & ~mlp_correct
+        ),
+        "both_wrong": np.flatnonzero(
+            ~softmax_correct & ~mlp_correct
+        ),
+    }
