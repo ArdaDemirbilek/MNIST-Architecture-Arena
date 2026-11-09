@@ -19,3 +19,26 @@ def confusion_matrix(y_true, y_pred, num_classes=10):
     for actual, predicted in zip(y_true, y_pred):
         matrix[actual, predicted] += 1
     return matrix
+
+
+def per_class_accuracy(cm):
+    """
+    Calculate the recall (accuracy) for each class.
+
+    Args:
+        cm: Confusion matrix of shape (num_classes, num_classes).
+
+    Returns:
+        Array containing per-class accuracy percentages.
+    """
+    correct_predictions = np.diag(cm)
+    total_samples = np.sum(cm, axis=1)
+
+    accuracies = np.divide(
+        correct_predictions,
+        total_samples,
+        out=np.zeros_like(correct_predictions, dtype=float),
+        where=total_samples != 0,
+    ) * 100
+
+    return accuracies

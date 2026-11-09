@@ -3,9 +3,19 @@ import numpy as np
 from models.softmax_regression import SoftmaxRegression, cross_entropy
 from models.mlp import MLP
 from utils.data import load_mnist
-from utils.plots import plot_training_history, plot_model_comparison, plot_confusion_matrix
 from utils.experiments import save_experiment
-from utils.evaluation import confusion_matrix
+from utils.plots import (
+    plot_training_history, 
+    plot_model_comparison, 
+    plot_confusion_matrix, 
+    plot_per_class_accuracy
+)
+from utils.evaluation import (
+    confusion_matrix, 
+    per_class_accuracy
+)
+
+
 
 
 def main():
@@ -87,17 +97,19 @@ def main():
         save_path=softmax_dir / "training_loss.png",
     )
 
-    cm = confusion_matrix(
-        np.argmax(Y_val, axis=1), 
-        np.argmax(softmax_val_probs, axis=1), 
-        num_classes=10
-        )
+    softmax_cm = confusion_matrix(
+    np.argmax(Y_val, axis=1),
+    np.argmax(softmax_val_probs, axis=1),
+    num_classes=10,
+)
 
-    assert cm.sum() == len(Y_val)
-    
+    assert softmax_cm.sum() == len(Y_val)
+
+    softmax_per_class = per_class_accuracy(softmax_cm)
+
     plot_confusion_matrix(
-        cm=cm, 
-        class_names=["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+        cm=softmax_cm,
+        class_names=[str(i) for i in range(10)],
         title="Confusion Matrix of Softmax Regression",
         save_path=softmax_dir / "confusion_matrix.png",
     )
@@ -175,17 +187,19 @@ def main():
         save_path=mlp_dir / "training_loss.png",
     )
 
-    cm = confusion_matrix(
-        np.argmax(Y_val, axis=1), 
-        np.argmax(mlp_val_probs, axis=1), 
-        num_classes=10
+    mlp_cm = confusion_matrix(
+    np.argmax(Y_val, axis=1),
+    np.argmax(mlp_val_probs, axis=1),
+    num_classes=10,
     )
 
-    assert cm.sum() == len(Y_val)
+    assert mlp_cm.sum() == len(Y_val)
+
+    mlp_per_class = per_class_accuracy(mlp_cm)
 
     plot_confusion_matrix(
-        cm=cm, 
-        class_names=["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"],
+        cm=mlp_cm,
+        class_names=[str(i) for i in range(10)],
         title="Confusion Matrix of MLP",
         save_path=mlp_dir / "confusion_matrix.png",
     )
@@ -210,6 +224,31 @@ def main():
         softmax_history_path="experiments/softmax_baseline/history.json",
         mlp_history_path="experiments/mlp_128/history.json",
     )
+
+    assert np.isclose(
+        np.trace(softmax_cm) / softmax_cm.sum(),
+        softmax_val_accuracy,
+    )
+
+    assert np.isclose(
+        np.trace(mlp_cm) / mlp_cm.sum(),
+        mlp_val_accuracy,
+    )
+
+    plot_per_class_accuracy(
+        softmax_accuracies=softmax_per_class,
+        mlp_accuracies=mlp_per_class,
+        save_path="experiments/comparison/per_class_accuracy.png",
+    )
+
+    print("\n  Softmax   |   MLP")
+    for i in range(len(softmax_per_class)):
+        print(i, end=": ")
+        print(
+            np.round(softmax_per_class[i], decimals=2), 
+            np.round(mlp_per_class[i], decimals=2), 
+            sep="\t\t"
+        )
 
     print("\nExperiments saved successfully.")
 

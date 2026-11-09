@@ -198,3 +198,72 @@ def plot_confusion_matrix(
 
     plt.show()
     plt.close(fig)
+
+
+def plot_per_class_accuracy(
+    softmax_accuracies,
+    mlp_accuracies,
+    save_path=None,
+):
+    """
+    Compare per-class accuracy between Softmax Regression and MLP.
+
+    Args:
+        softmax_accuracies: Accuracy percentages for Softmax Regression.
+        mlp_accuracies: Accuracy percentages for MLP.
+        save_path: Optional path for saving the plot.
+    """
+
+    softmax_accuracies = np.asarray(softmax_accuracies)
+    mlp_accuracies = np.asarray(mlp_accuracies)
+
+    if softmax_accuracies.shape != mlp_accuracies.shape:
+        raise ValueError("Both models must have the same number of classes.")
+
+    num_classes = len(softmax_accuracies)
+
+    classes = np.arange(num_classes)
+    width = 0.35
+
+    fig, ax = plt.subplots(figsize=(11, 6))
+
+    ax.bar(
+        classes - width / 2,
+        softmax_accuracies,
+        width,
+        label="Softmax Regression",
+        color="#64748b",
+    )
+
+    ax.bar(
+        classes + width / 2,
+        mlp_accuracies,
+        width,
+        label="MLP (128 hidden neurons)",
+        color="#2563eb",
+    )
+
+    ax.set(
+        xlabel="Digit",
+        ylabel="Recall (%)",
+        title="MNIST - Per-Class Recall Comparison",
+        xticks=classes,
+    )
+
+    ax.set_ylim(0, 105)
+
+    ax.legend()
+    ax.grid(axis="y", linestyle="--", alpha=0.3)
+    ax.set_axisbelow(True)
+
+    fig.tight_layout()
+
+    if save_path is not None:
+        fig.savefig(
+            save_path,
+            dpi=150,
+            bbox_inches="tight",
+        )
+
+    plt.show()
+    plt.close(fig)
