@@ -49,6 +49,7 @@ def main():
     softmax_model = SoftmaxRegression(
         input_dim=softmax_config["input_dim"],
         num_classes=softmax_config["num_classes"],
+        seed=softmax_config["seed"]
     )
 
     softmax_initial_loss = float(
@@ -104,6 +105,10 @@ def main():
         history=softmax_history,
     )
 
+    softmax_model.save_weights(
+        softmax_dir / "model_weights.npz"
+    )
+
     plot_training_history(
         softmax_history,
         save_path=softmax_dir / "training_loss.png",
@@ -150,6 +155,7 @@ def main():
         input_dim=mlp_config["input_dim"],
         hidden_dim=mlp_config["hidden_dim"],
         num_classes=mlp_config["num_classes"],
+        seed=mlp_config["seed"],
     )
 
     mlp_initial_loss = float(
@@ -204,6 +210,10 @@ def main():
         config=mlp_config,
         metrics=mlp_metrics,
         history=mlp_history,
+    )
+
+    mlp_model.save_weights(
+        mlp_dir / "model_weights.npz"
     )
 
     plot_training_history(

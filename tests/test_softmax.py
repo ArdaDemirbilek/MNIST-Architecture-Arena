@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from models.softmax_regression import softmax, cross_entropy
 from models.softmax_regression import SoftmaxRegression 
@@ -138,4 +139,74 @@ class TestSoftmaxRegression:
         assert np.allclose(dW_calc, dW_target)
         assert np.allclose(db_calc, db_target)
 
+    def test_checkpoint_mechanism(self, tmp_path):
+        """
+        Verify that saving and loading model weights
+        preserves predictions after training.
+        """
+        rng = np.random.default_rng(123)
+    
+        X_train = rng.standard_normal((16, 5))
+        Y_train = np.eye(3)[rng.integers(0, 3, size=16)]
+    
+        original_model = SoftmaxRegression(
+            input_dim=5, 
+            num_classes=3, 
+            seed=42
+        )
+    
+        original_model.fit(
+            X_train,
+            Y_train,
+            epochs=2,
+            batch_size=4,
+            learning_rate=0.01,
+        )
+    
+        original_predictions = original_model.forward(X_train)
+    
+        weights_path = tmp_path / "model_weights.npz"
+    
+        original_model.save_weights(weights_path)
+    
+        restored_model = SoftmaxRegression(
+            input_dim=5, 
+            num_classes=3, 
+            seed=32,
+        )
+    
+        restored_model.load_weights(weights_path)
+    
+        restored_predictions = restored_model.forward(X_train)
+    
+        np.testing.assert_allclose(
+            original_predictions,
+            restored_predictions,
+            rtol=0,
+            atol=1e-12,
+        )
+    
+        for name in ("W", "b"):
+            np.testing.assert_array_equal(
+                getattr(original_model, name),
+                getattr(restored_model, name),
+            )
+
+    def test_checkpoint_shape_mismatch(self, tmp_path):
+        """Checks that loading weights saved from a model with a different input dimension raises a ValueError."""
+        original = SoftmaxRegression(
+            input_dim=5,
+            num_classes=3,
+        )
+
+        path = tmp_path / "weights.npz"
+        original.save_weights(path)
+
+        incompatible = SoftmaxRegression(
+            input_dim=8,
+            num_classes=3,
+        )
+
+        with pytest.raises(ValueError, match="Shape mismatch"):
+            incompatible.load_weights(path)
 

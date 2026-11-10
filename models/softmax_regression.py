@@ -35,7 +35,13 @@ def cross_entropy(probs: np.ndarray, targets: np.ndarray) -> float:
 
 
 class SoftmaxRegression:
-    def __init__(self, input_dim: int, num_classes: int):
+    def __init__(
+        self, 
+        input_dim: int, 
+        num_classes: int, 
+        seed: int = 42
+    ):
+        self.rng = np.random.default_rng(seed)
         self.input_dim = input_dim
         self.num_classes = num_classes
         self.W = np.zeros((self.input_dim, self.num_classes))
@@ -94,11 +100,10 @@ class SoftmaxRegression:
         history = {
             "train_loss": []
         }
-        rng = np.random.default_rng(seed=42)  
         num_exp = X_train.shape[0]
 
         for _ in range(epochs):
-            permutation_indices = rng.permutation(num_exp)
+            permutation_indices = self.rng.permutation(num_exp)
             X_shuffled, Y_shuffled = X_train[permutation_indices], Y_train[permutation_indices]
 
             for start in range(0, num_exp, batch_size):
@@ -113,3 +118,36 @@ class SoftmaxRegression:
             history["train_loss"].append(float(loss))
 
         return history
+
+    def save_weights(self, path):
+        """
+        Save the model's learned parameters to an NPZ file.
+    
+        Args:
+            path: Destination path of the NPZ file.
+        """
+        np.savez(
+            path,
+            W=self.W,
+            b=self.b,
+        )
+    
+    def load_weights(self, path):
+        """
+        Load model parameters after validating their shapes.
+        """
+        with np.load(path, allow_pickle=False) as data:
+            weights = {}
+
+            for name in ("W", "b"):
+                saved = data[name]
+                current = getattr(self, name)
+
+                if saved.shape != current.shape:
+                    raise ValueError(
+                        f"Shape mismatch for {name}: "
+                        f"expected {current.shape}, got {saved.shape}"
+                    )
+                weights[name] = saved.copy()
+        for name, values in weights.items():
+            setattr(self, name, values)

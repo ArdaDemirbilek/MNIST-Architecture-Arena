@@ -3,6 +3,6 @@
     "final_training_loss": 0.22800643718168284,
     "validation_accuracy": 0.925,
     "validation_loss": 0.25280542392762856,
-    "training_time_seconds": 46.66430349997245,
+    "training_time_seconds": 53.835369600041304,
     "num_parameters": 101770
 }
