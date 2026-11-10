@@ -9,3 +9,6 @@ results/models/
 
 .env
 .vscode/
+
+# Model checkpoints
+*.npz
