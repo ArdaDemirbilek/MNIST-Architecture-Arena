@@ -3,6 +3,8 @@ import numpy as np
 from models.mlp import relu, MLP
 from models.softmax_regression import cross_entropy
 
+from utils.data import load_mnist
+
 
 class TestRelu:
     def test_relu_mathematical_property(self):
@@ -58,3 +60,58 @@ class TestMLP:
                 numerical_grad[idx] = (loss_plus - loss_minus) / (2 * eps)
 
             assert np.allclose(grad, numerical_grad, rtol=0, atol=1e-7)
+
+    def test_checkpoint_mechanism(self, tmp_path):
+        """
+        Verify that saving and loading model weights
+        preserves predictions after training.
+        """
+        rng = np.random.default_rng(123)
+
+        X_train = rng.standard_normal((16, 5))
+        Y_train = np.eye(3)[rng.integers(0, 3, size=16)]
+
+        original_model = MLP(
+            input_dim=5,
+            hidden_dim=4,
+            num_classes=3,
+            seed=42,
+        )
+
+        original_model.fit(
+            X_train,
+            Y_train,
+            epochs=2,
+            batch_size=4,
+            learning_rate=0.01,
+        )
+
+        original_predictions = original_model.forward(X_train)
+
+        weights_path = tmp_path / "model_weights.npz"
+
+        original_model.save_weights(weights_path)
+
+        restored_model = MLP(
+            input_dim=5,
+            hidden_dim=4,
+            num_classes=3,
+            seed=32,
+        )
+
+        restored_model.load_weights(weights_path)
+
+        restored_predictions = restored_model.forward(X_train)
+
+        np.testing.assert_allclose(
+            original_predictions,
+            restored_predictions,
+            rtol=0,
+            atol=1e-12,
+        )
+
+        for name in ("W1", "b1", "W2", "b2"):
+            np.testing.assert_array_equal(
+                getattr(original_model, name),
+                getattr(restored_model, name),
+            )

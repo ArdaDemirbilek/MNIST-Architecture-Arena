@@ -17,8 +17,14 @@ def relu(X: np.ndarray) -> np.ndarray:
 
 
 class MLP:
-    def __init__(self, input_dim: int, hidden_dim: int, num_classes: int):
-        self.rng = np.random.default_rng(42)
+    def __init__(
+        self, 
+        input_dim: int, 
+        hidden_dim: int, 
+        num_classes: int,
+        seed: int = 42,
+    ):
+        self.rng = np.random.default_rng(seed)
         self.input_dim = input_dim
         self.hidden_dim = hidden_dim
         self.num_classes = num_classes
@@ -122,3 +128,39 @@ class MLP:
             history["train_loss"].append(float(loss))
 
         return history
+
+    def save_weights(self, path):
+        """
+        Save the model's learned parameters to an NPZ file.
+
+        Args:
+            path: Destination path of the NPZ file.
+        """
+        np.savez(
+            path,
+            W1=self.W1,
+            b1=self.b1,
+            W2=self.W2,
+            b2=self.b2,
+        )
+
+    def load_weights(self, path):
+        """
+        Load previously saved model parameters from an NPZ file.
+
+        Args:
+            path: Path of the NPZ file to loasd.
+
+        Raises:
+            ValueError: If a saved array's shape does not match the model's.
+        """
+        with np.load(path, allow_pickle=False) as data:
+            for name in ("W1", "b1", "W2", "b2"):
+                saved = data[name]
+                current = getattr(self, name)
+                if saved.shape != current.shape:
+                    raise ValueError(
+                        f"Shape mismatch for {name}: "
+                        f"expected {current.shape}, got {saved.shape}"
+                    )
+                setattr(self, name, saved.copy())
