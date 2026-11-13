@@ -88,11 +88,12 @@ class MLP:
         db1 = np.sum(dz1, axis=0) / m
         return dW1, db1, dW2, db2
 
-    def fit(self, X_train, Y_train, epochs=20, batch_size=64, learning_rate=0.01):
+    def fit(self, X_train, Y_train, epochs=20, batch_size=64, learning_rate=0.01, X_val=None, Y_val=None):
         """
         Train the model with mini-batch gradient descent. The training
         data is shuffled at the start of every epoch, and the loss on
-        the full training set is recorded after each epoch.
+        the full training set is recorded after each epoch. If
+        validation data is given, the validation loss is recorded too.
 
         Args:
             X_train: Training inputs of shape (num_samples, input_dim).
@@ -100,13 +101,24 @@ class MLP:
             epochs: Number of passes over the training data.
             batch_size: Number of samples per gradient update.
             learning_rate: Step size for the parameter updates.
+            X_val: Optional validation inputs of shape (num_val, input_dim).
+            Y_val: Optional one-hot validation labels of shape
+                (num_val, num_classes). Must be given together with X_val.
 
         Returns:
-            Dictionary with a "train_loss" list holding the mean
-            cross-entropy loss after each epoch.
+            Dictionary with "train_loss" and "val_loss" lists holding the
+            mean cross-entropy loss after each epoch. "val_loss" stays
+            empty when no validation data is given.
+
+        Raises:
+            ValueError: If only one of X_val and Y_val is provided.
         """
+        if (X_val is None) != (Y_val is None):
+            raise ValueError("X_val and Y_val must be provided together.")
+
         history = {
-            "train_loss": []
+            "train_loss": [],
+            "val_loss": [],
         }
         num_exp = X_train.shape[0]
 
@@ -126,6 +138,11 @@ class MLP:
             probs = self.forward(X_train)
             loss = cross_entropy(probs, Y_train)
             history["train_loss"].append(float(loss))
+
+            if X_val is not None and Y_val is not None:
+                val_probs = self.forward(X_val)
+                val_loss = cross_entropy(val_probs, Y_val)
+                history["val_loss"].append(float(val_loss))
 
         return history
 
