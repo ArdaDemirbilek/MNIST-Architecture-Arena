@@ -146,21 +146,22 @@ class MLP:
 
     def load_weights(self, path):
         """
-        Load previously saved model parameters from an NPZ file.
-
-        Args:
-            path: Path of the NPZ file to loasd.
-
-        Raises:
-            ValueError: If a saved array's shape does not match the model's.
+        Load model parameters after validating their shapes.
         """
         with np.load(path, allow_pickle=False) as data:
+            weights = {}
+
             for name in ("W1", "b1", "W2", "b2"):
                 saved = data[name]
                 current = getattr(self, name)
+
                 if saved.shape != current.shape:
                     raise ValueError(
                         f"Shape mismatch for {name}: "
                         f"expected {current.shape}, got {saved.shape}"
                     )
-                setattr(self, name, saved.copy())
+
+                weights[name] = saved.copy()
+
+        for name, values in weights.items():
+            setattr(self, name, values)
