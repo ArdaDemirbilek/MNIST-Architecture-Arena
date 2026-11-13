@@ -1,8 +1,0 @@
-{
-    "initial_training_loss": 2.302585092994046,
-    "final_training_loss": 0.27136021672075306,
-    "validation_accuracy": 0.9092,
-    "validation_loss": 0.3154651300292771,
-    "training_time_seconds": 5.074508299992885,
-    "num_parameters": 7850
-}

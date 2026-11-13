@@ -1,0 +1,7 @@
+{
+    "initial_training_loss": 2.4313954621105256,
+    "final_training_loss": 0.04723140951384101,
+    "validation_accuracy": 0.9734,
+    "validation_loss": 0.0905291673314564,
+    "training_time_seconds": 262.0225345999934
+}
