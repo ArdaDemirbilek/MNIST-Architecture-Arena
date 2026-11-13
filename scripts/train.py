@@ -125,6 +125,7 @@ def main():
     plot_training_history(
         history,
         save_path=experiment_dir / "training_loss.png",
+        show=False,
     )
 
     y_true = np.argmax(Y_val, axis=1)

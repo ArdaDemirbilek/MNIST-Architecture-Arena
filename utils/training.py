@@ -48,6 +48,8 @@ def run_training(
         epochs=config["epochs"],
         batch_size=config["batch_size"],
         learning_rate=config["learning_rate"],
+        X_val=X_val,
+        Y_val=Y_val,
     )
 
     training_time = time.perf_counter() - start
