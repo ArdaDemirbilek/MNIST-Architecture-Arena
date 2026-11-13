@@ -5,18 +5,26 @@ import numpy as np
 
 
 
-def plot_training_history(history, save_path=None):
+def plot_training_history(history, save_path=None, show=True):
     """
-    Plot training loss over completed epochs.
+    Plot training loss over completed epochs, together with validation
+    loss when the history contains it.
+
+    Args:
+        history: Dictionary returned by a model's fit(), with a
+            "train_loss" list and an optional "val_loss" list.
+        save_path: Optional path to save the figure to.
+        show: Whether to display the figure. The figure is closed
+            afterwards in either case.
     """
-    losses = history["train_loss"]
-    epochs = range(1, len(losses) + 1)
+    train_losses = history["train_loss"]
+    epochs = range(1, len(train_losses) + 1)
 
     fig, ax = plt.subplots(figsize=(9, 5))
 
     ax.plot(
         epochs,
-        losses,
+        train_losses,
         color="#2563eb",
         linewidth=2,
         marker="o",
@@ -24,7 +32,18 @@ def plot_training_history(history, save_path=None):
         label="Training Loss"
     )
 
-    ax.set_title("Training Loss")
+    if history.get("val_loss"):
+        ax.plot(
+            epochs,
+            history["val_loss"],
+            color="#801603",
+            linewidth=2,
+            marker="o",
+            markersize=4,
+            label="Validation Loss",
+        )
+
+    ax.set_title("Training and Validation Loss")
     ax.set_xlabel("Epoch")
     ax.set_ylabel("Cross-Entropy Loss")
 
@@ -38,7 +57,10 @@ def plot_training_history(history, save_path=None):
         save_path.parent.mkdir(parents=True, exist_ok=True)
         fig.savefig(save_path, dpi=180, bbox_inches="tight")
 
-    plt.show()
+    if show:
+        plt.show()
+
+    plt.close(fig)
 
 
 def plot_model_comparison(
