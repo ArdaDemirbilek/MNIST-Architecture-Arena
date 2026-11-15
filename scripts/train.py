@@ -62,6 +62,13 @@ def main():
         help="Random seed for reproducibility.",
     )
 
+    parser.add_argument(
+        "--experiment",
+        type=str,
+        default="general",
+        help="Experiment category.",
+    )
+
     args = parser.parse_args()
 
     if args.lr <= 0:
@@ -104,12 +111,14 @@ def main():
 
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
 
-    experiment_name = (
+    run_name = (
         f"{config['model']}_"
         f"lr{config['learning_rate']}_"
         f"seed{config['seed']}_"
         f"{timestamp}"
     )
+
+    experiment_name = f"{args.experiment}/{run_name}"
 
     experiment_dir = save_experiment(
         name=experiment_name,
