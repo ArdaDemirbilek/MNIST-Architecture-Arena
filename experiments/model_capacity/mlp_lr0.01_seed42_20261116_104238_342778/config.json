@@ -1,0 +1,11 @@
+{
+    "model": "mlp",
+    "input_dim": 784,
+    "num_classes": 10,
+    "learning_rate": 0.01,
+    "epochs": 50,
+    "batch_size": 64,
+    "hidden_dim": 256,
+    "seed": 42,
+    "validation_size": 5000
+}
